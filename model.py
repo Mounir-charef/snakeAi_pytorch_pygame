@@ -1,22 +1,29 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import numpy as np
 import torch.nn.functional as F
 import os
 
 
 class LinearQnet(nn.Module):
-    def __init__(self, input_size, hidden_size1, hidden_size2, output_size):
+    def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
-        self.linear1 = nn.Linear(input_size, hidden_size1)
-        self.linear2 = nn.Linear(hidden_size1, hidden_size2)
-        self.linear3 = nn.Linear(hidden_size2, output_size)
+        # self.layers = nn.Sequential(
+        #     nn.Linear(input_size, hidden_size),
+        #     nn.BatchNorm1d(hidden_size),
+        #     nn.ReLU(),
+        #     nn.Linear(hidden_size, output_size)
+        # )
+        self.linear1 = nn.Linear(in_features=input_size, out_features=hidden_size)
+        self.batch = nn.BatchNorm1d(num_features=hidden_size)
+        self.linear2 = nn.Linear(hidden_size, output_size)
 
     def forward(self, x):
-        x = F.relu(self.linear1(x))
-        x = F.relu(self.linear2(x))
-        x = self.linear3(x)
-        return x
+        x = self.linear1(x)
+        # x = self.batch(x)
+        x = F.relu(x)
+        return self.linear2(x)
 
     def save(self, file_name='model.pth'):
         model_folder_path = './models'
@@ -36,6 +43,8 @@ class QTrainer:
         self.criterion = nn.MSELoss()
 
     def train_step(self, state, action, reward, next_state, done):
+        state = np.array(state)
+        next_state = np.array(next_state)
         state = torch.tensor(state, dtype=torch.float)
         next_state = torch.tensor(next_state, dtype=torch.float)
         action = torch.tensor(action, dtype=torch.long)

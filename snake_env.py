@@ -17,13 +17,12 @@ class Direction(Enum):
 
 point = namedtuple("Point", 'x, y')
 
-BLOCK_SIZE = 20
-SPEED = 200
+BLOCK_SIZE = 10
+SPEED = 144
 # colors
 WHITE = (255, 255, 255)
-RED = (200, 0, 0)
-BLUE1 = (20, 20, 200)
-BLUE2 = (0, 100, 255)
+YELLOW = (255, 255, 0)
+GREEN = (0, 128, 0)
 BLACK = (20, 20, 20)
 
 
@@ -31,6 +30,11 @@ class SnakeEnv:
     def __init__(self, w=640, h=480):
         self.w = w
         self.h = h
+        self.frame_iteration = None
+        self.food = None
+        self.score = None
+        self.head = None
+        self.snake = None
         # init display
         self.display = pygame.display.set_mode((self.w, self.h))
         pygame.display.set_caption('Snake game')
@@ -131,10 +135,9 @@ class SnakeEnv:
     def _update_ui(self):
         self.display.fill(BLACK)
         for pt in self.snake:
-            pygame.draw.rect(self.display, BLUE1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
-            pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x + 4, pt.y + 4, 12, 12))
+            pygame.draw.rect(self.display, GREEN, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
 
-        pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
+        pygame.draw.rect(self.display, YELLOW, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
 
         text = font.render(f"Score is : {self.score}", True, WHITE)
         self.display.blit(text, [3, 0])

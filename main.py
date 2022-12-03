@@ -4,8 +4,9 @@ import numpy as np
 from collections import deque
 from snake_env import SnakeEnv, Direction, point, BLOCK_SIZE
 from model import LinearQnet, QTrainer
-from helper import plot
-from threading import Thread
+import os
+# from helper import plot
+# from threading import Thread
 
 MAX_MEM = 100_000
 BATCH_SIZE = 1000
@@ -19,9 +20,10 @@ class Agent:
         self.epsilon = 0  # random
         self.gamma = 0.9  # discount
         self.memory = deque(maxlen=MAX_MEM)
-        self.model = LinearQnet(11, 512, 256, 3)
-        # checkpoint = torch.load('./models/model.pth')
-        # self.model.load_state_dict(checkpoint)
+        self.model = LinearQnet(11, 512, 3)
+        if os.path.exists('./models/model.pth'):
+            checkpoint = torch.load('./models/model.pth')
+            self.model.load_state_dict(checkpoint)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
     @staticmethod
@@ -86,41 +88,41 @@ class Agent:
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
 
-    def get_action(self, state):
-        self.epsilon = 80 - self.n_games
-        final_move = [0, 0, 0]
-        if random.randint(0, 200) < self.epsilon:
-            move = random.randint(0, 2)
-            final_move[move] = 1
-        else:
-            state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.model(state0)
-            move = torch.argmax(prediction).item()
-            final_move[move] = 1
-
-        return final_move
-
     # def get_action(self, state):
     #     self.epsilon = 80 - self.n_games
     #     final_move = [0, 0, 0]
-    #     state0 = torch.tensor(state, dtype=torch.float)
-    #     prediction = self.model(state0)
-    #     move = torch.argmax(prediction).item()
-    #     final_move[move] = 1
+    #     if random.randint(0, 200) < self.epsilon:
+    #         move = random.randint(0, 2)
+    #         final_move[move] = 1
+    #     else:
+    #         state0 = torch.tensor(state, dtype=torch.float)
+    #         prediction = self.model(state0)
+    #         move = torch.argmax(prediction).item()
+    #         final_move[move] = 1
     #
     #     return final_move
 
+    def get_action(self, state):
+        self.epsilon = 80 - self.n_games
+        final_move = [0, 0, 0]
+        state0 = torch.tensor(state, dtype=torch.float)
+        prediction = self.model(state0)
+        move = torch.argmax(prediction).item()
+        final_move[move] = 1
 
-def get_new_thread(func, *args):
-    thread = Thread(target=func, args=args)
-    thread.start()
-    thread.join()
+        return final_move
+
+
+# def get_new_thread(func, *args):
+#     thread = Thread(target=func, args=args)
+#     thread.start()
+#     thread.join()
 
 
 def train():
-    plot_scores = []
-    plot_mean_scores = []
-    total_score = 0
+    # plot_scores = []
+    # plot_mean_scores = []
+    # total_score = 0
     record = 0
     agent = Agent()
     game = SnakeEnv()
@@ -150,10 +152,10 @@ def train():
                 record = score
                 agent.model.save()
 
-            plot_scores.append(score)
-            total_score += score
-            plot_mean_scores.append(total_score / agent.n_games)
-            plot(plot_scores, plot_mean_scores)
+            # plot_scores.append(score)
+            # total_score += score
+            # plot_mean_scores.append(total_score / agent.n_games)
+            # plot(plot_scores, plot_mean_scores)
             # get_new_thread(plot, (plot_scores, plot_mean_scores))
 
 
