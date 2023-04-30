@@ -25,7 +25,7 @@ class LinearQnet(nn.Module):
         x = F.relu(x)
         return self.linear2(x)
 
-    def save(self, file_name='model.pth'):
+    def save(self, file_name='model1.pth'):
         model_folder_path = './models'
         if not os.path.exists(model_folder_path):
             os.makedirs(model_folder_path)
@@ -58,7 +58,6 @@ class QTrainer:
             action = torch.unsqueeze(action, 0)
             reward = torch.unsqueeze(reward, 0)
             done = (done,)
-
         # 1: predicted Q values with current state
         pred = self.model(state)
 
@@ -69,7 +68,6 @@ class QTrainer:
                 Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
 
             target[idx][torch.argmax(action[idx]).item()] = Q_new
-
         # 2: Q_new = r + y * max(next_predicted Q value) -> only do this if not done
         # pred.clone()
         # preds[argmax(action)] = Q_new

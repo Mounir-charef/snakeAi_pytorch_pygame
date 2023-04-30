@@ -5,6 +5,7 @@ from collections import deque
 from snake_env import SnakeEnv, Direction, point, BLOCK_SIZE
 from model import LinearQnet, QTrainer
 import os
+
 # from helper import plot
 # from threading import Thread
 
@@ -21,8 +22,8 @@ class Agent:
         self.gamma = 0.9  # discount
         self.memory = deque(maxlen=MAX_MEM)
         self.model = LinearQnet(11, 512, 3)
-        if os.path.exists('./models/model.pth'):
-            checkpoint = torch.load('./models/model.pth')
+        if os.path.exists('./models/model1.pth'):
+            checkpoint = torch.load('./models/model1.pth')
             self.model.load_state_dict(checkpoint)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
 
@@ -88,29 +89,28 @@ class Agent:
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
 
-    # def get_action(self, state):
-    #     self.epsilon = 80 - self.n_games
-    #     final_move = [0, 0, 0]
-    #     if random.randint(0, 200) < self.epsilon:
-    #         move = random.randint(0, 2)
-    #         final_move[move] = 1
-    #     else:
-    #         state0 = torch.tensor(state, dtype=torch.float)
-    #         prediction = self.model(state0)
-    #         move = torch.argmax(prediction).item()
-    #         final_move[move] = 1
-    #
-    #     return final_move
-
     def get_action(self, state):
         self.epsilon = 80 - self.n_games
         final_move = [0, 0, 0]
-        state0 = torch.tensor(state, dtype=torch.float)
-        prediction = self.model(state0)
-        move = torch.argmax(prediction).item()
-        final_move[move] = 1
+        if random.randint(0, 200) < self.epsilon:
+            move = random.randint(0, 2)
+            final_move[move] = 1
+        else:
+            state0 = torch.tensor(state, dtype=torch.float)
+            prediction = self.model(state0)
+            move = torch.argmax(prediction).item()
+            final_move[move] = 1
 
         return final_move
+
+    # def get_action(self, state):
+    #     final_move = [0, 0, 0]
+    #     state0 = torch.tensor(state, dtype=torch.float)
+    #     prediction = self.model(state0)
+    #     move = torch.argmax(prediction).item()
+    #     final_move[move] = 1
+    #
+    #     return final_move
 
 
 # def get_new_thread(func, *args):

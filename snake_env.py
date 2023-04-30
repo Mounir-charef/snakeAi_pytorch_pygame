@@ -3,6 +3,7 @@ import random
 from enum import Enum
 from collections import namedtuple
 import numpy as np
+from sys import exit
 
 pygame.init()
 font = pygame.font.SysFont('arial', 25)
@@ -62,12 +63,12 @@ class SnakeEnv:
             self._place_food()
 
     def play_step(self, action):
-        # 1. get input
+        # 1. get input if QUIT
         self.frame_iteration += 1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                quit()
+                exit(0)
         # 2. move the snake
         self._move(action)
         self.snake.insert(0, self.head)
@@ -76,7 +77,7 @@ class SnakeEnv:
         game_over = False
         if self.is_collision() or self.frame_iteration > 100 * len(self.snake):
             game_over = True
-            reward -= 5
+            reward -= 10
             return reward, game_over, self.score
         # 4. check if food was eaten
         if self.head == self.food:
@@ -84,6 +85,7 @@ class SnakeEnv:
             reward += 10
             self._place_food()
         else:
+            reward -= 1
             self.snake.pop()
 
         # 5. refresh display
